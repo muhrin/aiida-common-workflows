@@ -2,7 +2,10 @@
 """Implementation of `aiida_common_workflows.common.relax.generator.RelaxInputGenerator` for NWChem."""
 from typing import Any, Dict, List
 import pathlib
+import warnings
 import yaml
+
+import numpy as np
 
 from aiida import engine
 from aiida import orm
@@ -46,6 +49,15 @@ class NwchemRelaxInputsGenerator(RelaxInputsGenerator):
         """Initialize the protocols class attribute by parsing them from the configuration file."""
         with open(pathlib.Path(__file__).parent / 'protocol.yml') as handle:
             self._protocols = yaml.safe_load(handle)
+
+    def get_kpoint_mesh(self, cell_matrix, target_spacing):
+        """Compute the required k-point grid to achieve a target spacing.
+        :param cell_matrix: a 3x3 array describing the cell vectors.
+        :param target_spacing: the desired minimum spacing between kpoints in reciprocal space.
+        """
+        reciprocal_axes_lengths = np.linalg.norm(np.linalg.inv(cell_matrix), axis=1)
+        kpoints = np.ceil(reciprocal_axes_lengths/target_spacing)
+        return kpoints.astype(int).tolist()
 
     def get_builder(
         self,
@@ -101,6 +113,11 @@ class NwchemRelaxInputsGenerator(RelaxInputsGenerator):
         _ = parameters.pop('description')
         _ = parameters.pop('name')
 
+        # kpoints
+        target_spacing = parameters.pop('kpoint_spacing')
+        grid_str = '{} {} {}'.format(*self.get_kpoint_mesh(structure.cell, target_spacing))
+        parameters['nwpw']['monkhorst-pack'] = grid_str
+
         # Relaxation type
         if relax_type == RelaxType.ATOMS:
             parameters['task'] = 'band optimize'
@@ -136,6 +153,12 @@ class NwchemRelaxInputsGenerator(RelaxInputsGenerator):
         # Not implemented yet - one has to specify the site, spin AND angular momentum
         if magnetization_per_site:
             raise ValueError('magnetization per site not yet supported')
+
+        # Special case of a molecule in "open boundary conditions"
+        if structure.pbc == (False, False, False):
+            warnings.warn('PBCs set to false in input structure: assuming this is a molecular calculation')
+            parameters['nwpw']['monkhorst-pack'] = '1 1 1' # Gamma only
+            parameters['nwpw']['cutoff'] = 500
 
         # Forces threshold.
         if threshold_forces is not None:
