@@ -13,8 +13,7 @@ from aiida.common.constants import elements
 pytest_plugins = ['aiida.manage.tests.pytest_fixtures']  # pylint: disable=invalid-name
 
 
-@pytest.fixture(scope='session')
-@pytest.mark.usefixtures('with_database')
+@pytest.fixture(scope='session', autouse=True)
 def with_database(aiida_profile):
     """Alias for the ``aiida_profile`` fixture from ``aiida-core``."""
     yield aiida_profile
