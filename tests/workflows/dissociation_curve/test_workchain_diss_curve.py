@@ -147,7 +147,6 @@ def test_validate_distances(ctx):
     """Test the `validate_scale_factors` validator."""
     assert dissociation.validate_distances(None, ctx) is None
     assert dissociation.validate_distances(orm.List(list=[0.98, 1, 1.02]), ctx) is None
-
     assert dissociation.validate_distances(orm.List(list=[0]), ctx) == 'need at least 2 distances.'
     assert dissociation.validate_distances(orm.List(list=[-1, -2, -2]), ctx) == 'distances must be positive.'
 
@@ -166,7 +165,6 @@ def test_validate_distance_max(ctx):
     """Test the `validate_distance_max` validator."""
     assert dissociation.validate_distance_max(None, ctx) is None
     assert dissociation.validate_distance_max(orm.Float(0.5), ctx) is None
-
     assert dissociation.validate_distance_max(orm.Float(-0.5), ctx) == '`distance_max` must be bigger than zero.'
 
 
@@ -175,5 +173,4 @@ def test_validate_distance_min(ctx):
     """Test the `validate_scale_increment` validator."""
     assert dissociation.validate_distance_min(None, ctx) is None
     assert dissociation.validate_distance_min(orm.Float(0.5), ctx) is None
-
     assert dissociation.validate_distance_min(orm.Float(-0.5), ctx) == '`distance_min` must be bigger than zero.'

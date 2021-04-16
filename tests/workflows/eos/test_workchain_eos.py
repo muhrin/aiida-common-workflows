@@ -122,7 +122,6 @@ def test_validate_scale_factors(ctx):
     """Test the `validate_scale_factors` validator."""
     assert eos.validate_scale_factors(None, ctx) is None
     assert eos.validate_scale_factors(orm.List(list=[0.98, 1, 1.02]), ctx) is None
-
     assert eos.validate_scale_factors(orm.List(list=[0, 1]), ctx) == 'need at least 3 scaling factors.'
 
 
@@ -131,7 +130,6 @@ def test_validate_scale_count(ctx):
     """Test the `validate_scale_count` validator."""
     assert eos.validate_scale_count(None, ctx) is None
     assert eos.validate_scale_count(orm.Int(3), ctx) is None
-
     assert eos.validate_scale_count(orm.Int(2), ctx) == 'need at least 3 scaling factors.'
 
 
@@ -140,7 +138,6 @@ def test_validate_scale_increment(ctx):
     """Test the `validate_scale_increment` validator."""
     assert eos.validate_scale_increment(None, ctx) is None
     assert eos.validate_scale_increment(orm.Float(0.5), ctx) is None
-
     assert eos.validate_scale_increment(orm.Float(0), ctx) == 'scale increment needs to be between 0 and 1.'
     assert eos.validate_scale_increment(orm.Float(1), ctx) == 'scale increment needs to be between 0 and 1.'
     assert eos.validate_scale_increment(orm.Float(-0.0001), ctx) == 'scale increment needs to be between 0 and 1.'
