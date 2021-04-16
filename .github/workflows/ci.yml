@@ -32,6 +32,8 @@ jobs:
             run:
                 pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
 
+        - run: ulimit -n 32000
+
     tests:
 
         runs-on: ubuntu-latest
